@@ -12,6 +12,7 @@ const validateTalkerAge = require('./middlewares/validateTalkerAge');
 const validateTalkerTalk = require('./middlewares/validateTalkerTalk');
 const validateTalkerWatchedAt = require('./middlewares/validateTalkerWatchedAt');
 const validateTalkerRate = require('./middlewares/validateTalkerRate');
+const validateSearchTerm = require('./middlewares/validateSearchTerm');
 
 const app = express();
 app.use(express.json());
@@ -57,6 +58,21 @@ app.post('/talker',
     talkers.push(newTalker);
     updateTalkersData(talkers);
     return res.status(HTTP_CREATED_STATUS).json(newTalker);
+  } catch (error) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR_STATUS).send({ message: error.message });
+  }
+});
+
+app.get('/talker/search',
+  validateToken,
+  validateSearchTerm, async (req, res) => {
+  try {
+    const { q } = req.query;
+    const talkers = await readTalkers();
+    const filteredTalkers = talkers
+      .filter(({ name }) => name.toLowerCase().includes(q.toLowerCase()));
+  
+    return res.status(200).json(filteredTalkers);
   } catch (error) {
     return res.status(HTTP_INTERNAL_SERVER_ERROR_STATUS).send({ message: error.message });
   }
