@@ -71,6 +71,31 @@ app.get('/talker/:id', validateId, async (req, res) => {
   }
 });
 
+app.put('/talker/:id',
+  validateId,
+  validateToken,
+  validateTalkerName,
+  validateTalkerAge,
+  validateTalkerTalk,
+  validateTalkerWatchedAt,
+  validateTalkerRate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, age, talk } = req.body;
+    const talkers = await readTalkers();
+    const talkerToUpdate = talkers.find((t) => t.id === Number(id));
+
+    talkerToUpdate.name = name;
+    talkerToUpdate.age = age;
+    talkerToUpdate.talk = talk;
+  
+    updateTalkersData(talkers);
+    return res.status(HTTP_OK_STATUS).json(talkerToUpdate);
+  } catch (error) {
+    return res.status(500).send({ message: error.message });
+  }
+});
+
 app.post('/login', validateEmail, validatePassword, (_req, res) => {
   try {
     const token = generateToken();
