@@ -1,4 +1,4 @@
-const readTalkers = require('../utils/handleJSON');
+const { readTalkers } = require('../utils/handleJSON');
 
 const HTTP_NOT_FOUND_STATUS = 404;
 
