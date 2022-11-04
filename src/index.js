@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const readTalkers = require('./utils/handleJSON');
+const generateToken = require('./utils/generateToken');
 const validateId = require('./middlewares/validateId');
 
 const app = express();
@@ -8,6 +9,10 @@ app.use(bodyParser.json());
 
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
+
+app.listen(PORT, () => {
+  console.log('Online');
+});
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
@@ -35,6 +40,11 @@ app.get('/talker/:id', validateId, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log('Online');
+app.post('/login', (_req, res) => {
+  try {
+    const token = generateToken();
+    return res.status(HTTP_OK_STATUS).json({ token });
+  } catch (error) {
+    return res.status(500).send({ message: error.message });
+  }
 });
