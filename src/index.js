@@ -19,6 +19,8 @@ app.use(bodyParser.json());
 
 const HTTP_OK_STATUS = 200;
 const HTTP_CREATED_STATUS = 201;
+const HTTP_NO_CONTENT_STATUS = 204;
+const HTTP_INTERNAL_SERVER_ERROR_STATUS = 500;
 const PORT = '3000';
 
 app.listen(PORT, () => {
@@ -36,7 +38,7 @@ app.get('/talker', async (_req, res) => {
     if (talkers.length === 0) return res.status(HTTP_OK_STATUS).json([]); 
     return res.status(HTTP_OK_STATUS).json(talkers);
   } catch (error) {
-    return res.status(500).send({ message: error.message });
+    return res.status(HTTP_INTERNAL_SERVER_ERROR_STATUS).send({ message: error.message });
   }
 });
 
@@ -56,7 +58,7 @@ app.post('/talker',
     updateTalkersData(talkers);
     return res.status(HTTP_CREATED_STATUS).json(newTalker);
   } catch (error) {
-    return res.status(500).send({ message: error.message });
+    return res.status(HTTP_INTERNAL_SERVER_ERROR_STATUS).send({ message: error.message });
   }
 });
 
@@ -67,7 +69,7 @@ app.get('/talker/:id', validateId, async (req, res) => {
     const talkerById = talkers.find((t) => t.id === Number(id));
     return res.status(HTTP_OK_STATUS).json(talkerById);
   } catch (error) {
-    return res.status(500).send({ message: error.message });
+    return res.status(HTTP_INTERNAL_SERVER_ERROR_STATUS).send({ message: error.message });
   }
 });
 
@@ -92,7 +94,24 @@ app.put('/talker/:id',
     updateTalkersData(talkers);
     return res.status(HTTP_OK_STATUS).json(talkerToUpdate);
   } catch (error) {
-    return res.status(500).send({ message: error.message });
+    return res.status(HTTP_INTERNAL_SERVER_ERROR_STATUS).send({ message: error.message });
+  }
+});
+
+app.delete('/talker/:id',
+  validateId,
+  validateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const talkers = await readTalkers();
+  
+    const arrPosition = talkers.findIndex((t) => t.id === Number(id));
+    talkers.splice(arrPosition, 1);
+  
+    updateTalkersData(talkers);
+    return res.status(HTTP_NO_CONTENT_STATUS).end();
+  } catch (error) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR_STATUS).send({ message: error.message });
   }
 });
 
@@ -101,6 +120,6 @@ app.post('/login', validateEmail, validatePassword, (_req, res) => {
     const token = generateToken();
     return res.status(HTTP_OK_STATUS).json({ token });
   } catch (error) {
-    return res.status(500).send({ message: error.message });
+    return res.status(HTTP_INTERNAL_SERVER_ERROR_STATUS).send({ message: error.message });
   }
 });
